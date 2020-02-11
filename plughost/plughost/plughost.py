@@ -6,14 +6,22 @@ import weakref
 
 from pkg_resources import iter_entry_points
 
+BLACKLISTED_PLUGIN_MODULES = [
+#        "extend.extend"
+    ]
+
 for entry_point in iter_entry_points(
         group='plughost.plugin'):
+    if entry_point.module_name in BLACKLISTED_PLUGIN_MODULES:
+        print(f"Skipping blacklisted plugin {entry_point.module_name}")
+        continue
+    print(f"Importing plugin {entry_point.module_name}...")
     importlib.import_module(entry_point.module_name)
 
 def modify_names(names):
     for name in names:
         results = signal.name_pre_modification.emit(name)
-        for result in results:
+        for plugin,result in results:
             print(result)
         name_mod = modify_name(name)
         signal.name_post_modification.emit(name)

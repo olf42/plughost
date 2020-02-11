@@ -11,8 +11,15 @@ class Signal:
         return func
 
     def emit(self, *args, **kwargs):
-        return [func(*args, **kwargs) for func in self.receivers]
+        responses = []
+        for receiver in self.receivers:
+            try:
+                response = receiver(*args, **kwargs)
+            except Exception as err:
+                responses.append((receiver.__name__, err))
+            else:
+                responses.append((receiver.__name__, response))
+        return responses
 
 name_pre_modification = Signal()
 name_post_modification = Signal()
-
